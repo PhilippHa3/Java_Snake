@@ -1,8 +1,5 @@
 import java.util.*;
 
-import javafx.geometry.Pos;
-
-
 public class SnakeGame {
     private Random random;
     private int[][] collision_array;
