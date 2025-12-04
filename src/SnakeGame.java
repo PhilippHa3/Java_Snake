@@ -11,6 +11,7 @@ public class SnakeGame {
     private boolean gameOver = false;
     private int score = 0;
     private boolean ateFoodLastRound = false;
+    private volatile Direction nextDirection = Direction.DOWN;
 
     public SnakeGame(int field_height, int field_width) {
         this.random = new Random();
@@ -27,10 +28,14 @@ public class SnakeGame {
         this.getNewFood();
     }
     
-    // returns if the game is still going
-    public boolean update(Direction newDirection) {
-        if (newDirection != null && !this.direction.isOpposite(newDirection)) {
-            this.direction = newDirection;
+    public void setNextDirection(Direction newDir) {
+        this.nextDirection = newDir;
+    }
+
+    public boolean update() {
+        // returns if the game is still going
+        if (this.nextDirection != null && !this.direction.isOpposite(this.nextDirection)) {
+            this.direction = this.nextDirection;
         }
         Position oldHeadPosition = this.snake_order.getLast();
         int newX = -1;
@@ -86,8 +91,8 @@ public class SnakeGame {
     }
 
     private boolean isCollision(int x, int y) {
-        return x < 0 || x > this.field_width ||
-            y < 0 || y > this.field_height ||
+        return x < 0 || x >= this.field_width ||
+            y < 0 || y >= this.field_height ||
             this.collision_array[x][y] > 0;
     }
 
@@ -102,6 +107,32 @@ public class SnakeGame {
     private boolean gameFieldFull(){
         int snakeLength = this.snake_order.size();
         return (snakeLength == this.field_width * this.field_height);
+    }
+
+    public void drawGameState() {
+        GameState curGameState = this.getGameState();
+        int height = curGameState.field_height;
+        int width = curGameState.field_width;
+        int[][] collision_array = curGameState.field_grid;
+        Position food = curGameState.food;
+
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (i == food.y && j == food.x) {
+                    System.out.print("x");
+                }
+                else if (collision_array[j][i] != 0) {
+                    System.out.print("o");
+                }
+                else {
+                    System.out.print("_");
+                }
+            }
+            System.out.println();
+        }
     }
 
     public GameState getGameState() {
