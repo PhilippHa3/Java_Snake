@@ -88,7 +88,6 @@ public class SnakeGame {
         }
 
         if (this.food.compare(pos)) {
-            System.out.println("SNAKE ATE THE FOOD!");
             this.ateFoodLastRound = true;
             if (this.gameFieldFull()) { 
                 // this.gameOver = true;
@@ -105,14 +104,6 @@ public class SnakeGame {
     public StepResult step(int newDirectionInt) {
         Direction newDirection = null;
         switch (newDirectionInt) {
-            case -1:
-                String obs = reset();
-                StepResult sr = new StepResult(
-                    obs, 
-                    0, 
-                    false
-                );
-                return sr;
             case 0:
                 newDirection = Direction.UP;
                 break;
@@ -129,7 +120,21 @@ public class SnakeGame {
                 break;
         }
         setNextDirection(newDirection);
+        // for (int i =0; i< this.collision_array.length; i++) {
+        //     for (int j =0 ; j < this.collision_array[0].length; j++) {
+        //         System.out.print(this.collision_array[i][j]);
+        //     }
+        //     System.out.println();
+        // }
+        // System.out.println();
         boolean running = update();
+        // for (int i =0; i< this.collision_array.length; i++) {
+        //     for (int j =0 ; j < this.collision_array[0].length; j++) {
+        //         System.out.print(this.collision_array[i][j]);
+        //     }
+        //     System.out.println();
+        // }
+        // System.out.println();
         StepResult result = new StepResult(
             collisionArrayToString(), 
             reward, 

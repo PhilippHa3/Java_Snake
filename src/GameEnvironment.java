@@ -21,19 +21,21 @@ public class GameEnvironment {
         out = new PrintWriter(client.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-        sendObservation(game.reset(), 0.0, false); 
-
         String inputLine;
         try {
             while ((inputLine = in.readLine()) != null) {
-                int action = Integer.parseInt(inputLine); 
+                int action = Integer.parseInt(inputLine);
 
-                StepResult result = game.step(action); 
-                sendObservation(result.obs, result.reward, result.done);
-
-                if (result.done) {
-                    String obs = game.reset(); 
-                    // sendObservation(obs, 0.0, false);
+                if (action == -1) {
+                    String obs = game.reset();
+                    sendObservation(obs, 0.0, false);
+                    out.flush();
+                    continue;
+                }
+                else {
+                    StepResult result = game.step(action); 
+                    sendObservation(result.obs, result.reward, result.done);
+                    out.flush();
                 }
             }
         } catch (SocketException e) {

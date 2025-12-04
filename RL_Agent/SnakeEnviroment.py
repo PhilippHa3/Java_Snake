@@ -32,7 +32,6 @@ class JavaSnakeEnv(gym.Env):
 
     def step(self, action):
         self.sock.sendall(f"{action}\n".encode('utf-8'))
-
         data = self.sock.recv(4096).decode('utf-8')
         obs, reward, done, info = self._parseInput(data)
         return obs, reward, False, done, info
@@ -54,7 +53,8 @@ if __name__ == '__main__':
     obs, _ = env.reset()
     i = 0
     while running:
-        obs, rew, _, done, _ = env.step(i%4)
+        # print((i%5) - 1)
+        obs, rew, _, done, _ = env.step((i%5)-1)
         print(obs, '\n', rew, '\n', done)
         time.sleep(1)
         i += 1
