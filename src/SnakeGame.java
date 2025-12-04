@@ -10,8 +10,10 @@ public class SnakeGame {
     private Direction direction = Direction.DOWN;
     private boolean gameOver = false;
     private int score = 0;
-    
-    public void initGame(int field_height, int field_width) {
+    private boolean ateFoodLastRound = false;
+
+    public SnakeGame(int field_height, int field_width) {
+        this.random = new Random();
         this.field_width = field_width;
         this.field_height = field_height;
         this.collision_array = new int[field_width][field_height];
@@ -23,15 +25,14 @@ public class SnakeGame {
         this.collision_array[startX][startY] = 1;
 
         this.getNewFood();
-        this.random = new Random();
     }
-
+    
     // returns if the game is still going
     public boolean update(Direction newDirection) {
         if (newDirection != null && !this.direction.isOpposite(newDirection)) {
             this.direction = newDirection;
         }
-        Position oldHeadPosition = this.snake_order.getFirst();
+        Position oldHeadPosition = this.snake_order.getLast();
         int newX = -1;
         int newY = -1;
         // get the new Head position of the snake after the update
@@ -42,7 +43,7 @@ public class SnakeGame {
                 break;
             case DOWN:
                 newX = oldHeadPosition.x;
-                newY = oldHeadPosition.y - 1;
+                newY = oldHeadPosition.y + 1;
                 break;
             case LEFT:
                 newX = oldHeadPosition.x - 1;
@@ -50,7 +51,7 @@ public class SnakeGame {
                 break;
             case UP:
                 newX = oldHeadPosition.x;
-                newY = oldHeadPosition.y + 1;
+                newY = oldHeadPosition.y - 1;
                 break;
             default:
                 break;
@@ -59,11 +60,20 @@ public class SnakeGame {
             this.gameOver = true;
             return false;
         }
-        Position pos = new Position(newX, newY); 
+        Position pos = new Position(newX, newY);
         this.collision_array[pos.x][pos.y] = 1;       
         this.snake_order.add(pos);
         // snake ate the food
+        if (this.ateFoodLastRound) {
+            this.ateFoodLastRound = false;
+        } else {
+            Position snakeTail = this.snake_order.removeFirst();
+            this.collision_array[snakeTail.x][snakeTail.y] = 0;
+        }
+
         if (this.food.compare(pos)) {
+            System.out.println("SNAKE ATE THE FOOD!");
+            this.ateFoodLastRound = true;
             if (this.gameFieldFull()) { 
                 this.gameOver = true;
                 return false; 
@@ -71,10 +81,7 @@ public class SnakeGame {
             this.getNewFood();
             this.score += 1;
         }
-        else {
-            Position snakeTail = this.snake_order.removeLast();
-            this.collision_array[snakeTail.x][snakeTail.y] = 0;
-        }
+    
         return true;
     }
 
@@ -162,12 +169,12 @@ public class SnakeGame {
 
     public class GameState {
         private List<Position> snake;
-        private int[][] field_grid;
-        private Position food;
+        public int[][] field_grid;
+        public Position food;
         private int score;
         private boolean gameOver;
-        private int field_width;
-        private int field_height;
+        public int field_width;
+        public int field_height;
         private List<Integer> direction;
 
         public GameState(List<Position> snake, int[][] field_grid, Position food, int score, boolean gameOver,
