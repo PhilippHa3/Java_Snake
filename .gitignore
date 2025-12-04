@@ -25,3 +25,8 @@ replay_pid*
 
 .vscode
 bin/*
+
+# Python specific ignores
+.venv
+logs
+__pycache__
