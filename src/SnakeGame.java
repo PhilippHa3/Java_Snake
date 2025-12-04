@@ -7,29 +7,37 @@ public class SnakeGame {
     private int field_height;
     private Deque<Position> snake_order = new ArrayDeque<>();
     private Position food;
+    private Position head;
     private Direction direction = Direction.DOWN;
-    private boolean gameOver = false;
+    // private boolean gameOver = false;
     private int score = 0;
     private boolean ateFoodLastRound = false;
     private volatile Direction nextDirection = Direction.DOWN;
 
-    public SnakeGame(int field_height, int field_width) {
+    private float reward = 0;
+
+    public SnakeGame(int field_width, int field_height) {
         this.random = new Random();
         this.field_width = field_width;
         this.field_height = field_height;
+        resetGame(field_width, field_height);
+    }
+    
+    public void setNextDirection(Direction newDir) {
+        this.nextDirection = newDir;
+    }
+
+    private void resetGame(int field_width, int field_height) {
         this.collision_array = new int[field_width][field_height];
 
         int startX = field_width/2;
         int startY = field_height/2;
         Position start_position = new Position(startX, startY);
+        this.head = start_position;
         this.snake_order.add(start_position);
         this.collision_array[startX][startY] = 1;
 
         this.getNewFood();
-    }
-    
-    public void setNextDirection(Direction newDir) {
-        this.nextDirection = newDir;
     }
 
     public boolean update() {
@@ -37,6 +45,7 @@ public class SnakeGame {
         if (this.nextDirection != null && !this.direction.isOpposite(this.nextDirection)) {
             this.direction = this.nextDirection;
         }
+        this.reward = 0;
         Position oldHeadPosition = this.snake_order.getLast();
         int newX = -1;
         int newY = -1;
@@ -62,10 +71,12 @@ public class SnakeGame {
                 break;
         }
         if (isCollision(newX, newY)) {
-            this.gameOver = true;
+            // this.gameOver = true;
+            this.reward = -1;
             return false;
         }
         Position pos = new Position(newX, newY);
+        this.head = pos;
         this.collision_array[pos.x][pos.y] = 1;       
         this.snake_order.add(pos);
         // snake ate the food
@@ -80,14 +91,56 @@ public class SnakeGame {
             System.out.println("SNAKE ATE THE FOOD!");
             this.ateFoodLastRound = true;
             if (this.gameFieldFull()) { 
-                this.gameOver = true;
+                // this.gameOver = true;
                 return false; 
             }
             this.getNewFood();
             this.score += 1;
+            this.reward = 1;
         }
-    
+        
         return true;
+    }
+
+    public StepResult step(int newDirectionInt) {
+        Direction newDirection = null;
+        switch (newDirectionInt) {
+            case -1:
+                String obs = reset();
+                StepResult sr = new StepResult(
+                    obs, 
+                    0, 
+                    false
+                );
+                return sr;
+            case 0:
+                newDirection = Direction.UP;
+                break;
+            case 1:
+                newDirection = Direction.RIGHT;
+                break;
+            case 2:
+                newDirection = Direction.DOWN;
+                break;
+            case 3:
+                newDirection = Direction.LEFT;
+                break;
+            default:
+                break;
+        }
+        setNextDirection(newDirection);
+        boolean running = update();
+        StepResult result = new StepResult(
+            collisionArrayToString(), 
+            reward, 
+            !running
+        );
+        return result;
+    }
+
+    public String reset() {
+        resetGame(field_width, field_height);
+        return collisionArrayToString();
     }
 
     private boolean isCollision(int x, int y) {
@@ -111,44 +164,65 @@ public class SnakeGame {
 
     public void drawGameState() {
         GameState curGameState = this.getGameState();
-        int height = curGameState.field_height;
-        int width = curGameState.field_width;
+        int height = curGameState.field_grid.length;
+        int width = curGameState.field_grid[0].length;
         int[][] collision_array = curGameState.field_grid;
-        Position food = curGameState.food;
 
         System.out.print("\033[H\033[2J");
         System.out.flush();
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (i == food.y && j == food.x) {
+                if (collision_array[j][i] == 3) {
                     System.out.print("x");
                 }
-                else if (collision_array[j][i] != 0) {
+                else if (collision_array[j][i] == 2) {
+                    System.out.print("O");
+                }
+                else if (collision_array[j][i] == 1) {
                     System.out.print("o");
                 }
                 else {
-                    System.out.print("_");
+                    System.out.print("-");
                 }
             }
             System.out.println();
         }
     }
 
-    public GameState getGameState() {
-        List<Position> snake = new ArrayList<Position>(this.snake_order);
-        Position food = new Position(this.food.x, this.food.y);
+    private int[][] updateCollisionArray() {
+        int[][] collision_array_coppy = new int[this.collision_array.length][];
+        for (int i = 0; i < this.collision_array.length; i++) {
+            collision_array_coppy[i] = Arrays.copyOf(this.collision_array[i], this.collision_array[i].length);
+        }
+        collision_array_coppy[this.head.x][this.head.y] = 2;
+        collision_array_coppy[this.food.x][this.food.y] = 3;
+        
+        return collision_array_coppy;
+    }
 
+    public GameState getGameState() {
+        int[][] collision_array_coppy = updateCollisionArray();
         return new GameState(
-            snake, 
-            this.collision_array,
-            food, 
-            this.score, 
-            this.gameOver, 
-            this.field_width, 
-            this.field_height, 
-            this.direction
+            collision_array_coppy
         );
+    }
+
+    public String collisionArrayToString() {
+        int[][] collision_array_coppy = updateCollisionArray();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < collision_array_coppy.length; i++) {
+            for (int j = 0; j < collision_array_coppy[0].length; j++) {
+                sb.append(collision_array_coppy[i][j]);
+                if (j < collision_array_coppy[i].length -1) {
+                    sb.append(',');
+                }
+            }
+            if (i < collision_array_coppy.length -1) {
+                sb.append(';');
+            }
+        }
+        return sb.toString();
     }
 
     public class Position {
@@ -199,25 +273,10 @@ public class SnakeGame {
     }
 
     public class GameState {
-        private List<Position> snake;
-        public int[][] field_grid;
-        public Position food;
-        private int score;
-        private boolean gameOver;
-        public int field_width;
-        public int field_height;
-        private List<Integer> direction;
+        private int[][] field_grid;
 
-        public GameState(List<Position> snake, int[][] field_grid, Position food, int score, boolean gameOver,
-                int field_width, int field_height, Direction direction) {
-                    this.snake = snake;
-                    this.field_grid = field_grid;
-                    this.food = food;
-                    this.score = score;
-                    this.gameOver = gameOver;
-                    this.field_width = field_width;
-                    this.field_height = field_height;
-                    this.direction = Arrays.asList(direction.dx, direction.dy);
-                }
+        public GameState(int[][] field_grid) {
+            this.field_grid = field_grid;
+        } 
     }
 }
