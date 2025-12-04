@@ -30,3 +30,4 @@ bin/*
 .venv
 logs
 __pycache__
+notebooks
