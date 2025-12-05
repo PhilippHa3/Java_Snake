@@ -5,12 +5,12 @@ public class SnakeGame {
     private int[][] collision_array;
     private int field_width;
     private int field_height;
-    private Deque<Position> snake_order = new ArrayDeque<>();
+    public Deque<Position> snake_order = new ArrayDeque<>();
     private Position food;
     private Position head;
     private Direction direction = Direction.DOWN;
     // private boolean gameOver = false;
-    private int score = 0;
+    // private int score = 0;
     private boolean ateFoodLastRound = false;
     private volatile Direction nextDirection = Direction.DOWN;
 
@@ -29,6 +29,7 @@ public class SnakeGame {
 
     private void resetGame(int field_width, int field_height) {
         this.collision_array = new int[field_width][field_height];
+        this.snake_order = new ArrayDeque<>();
 
         int startX = field_width/2;
         int startY = field_height/2;
@@ -77,14 +78,14 @@ public class SnakeGame {
         }
         Position pos = new Position(newX, newY);
         this.head = pos;
-        this.collision_array[pos.x][pos.y] = 1;       
+        this.collision_array[pos.y][pos.x] = 1;       
         this.snake_order.add(pos);
         // snake ate the food
         if (this.ateFoodLastRound) {
             this.ateFoodLastRound = false;
         } else {
             Position snakeTail = this.snake_order.removeFirst();
-            this.collision_array[snakeTail.x][snakeTail.y] = 0;
+            this.collision_array[snakeTail.y][snakeTail.x] = 0;
         }
 
         if (this.food.compare(pos)) {
@@ -94,7 +95,7 @@ public class SnakeGame {
                 return false; 
             }
             this.getNewFood();
-            this.score += 1;
+            // this.score += 1;
             this.reward = 1;
         }
         
@@ -120,21 +121,7 @@ public class SnakeGame {
                 break;
         }
         setNextDirection(newDirection);
-        // for (int i =0; i< this.collision_array.length; i++) {
-        //     for (int j =0 ; j < this.collision_array[0].length; j++) {
-        //         System.out.print(this.collision_array[i][j]);
-        //     }
-        //     System.out.println();
-        // }
-        // System.out.println();
         boolean running = update();
-        // for (int i =0; i< this.collision_array.length; i++) {
-        //     for (int j =0 ; j < this.collision_array[0].length; j++) {
-        //         System.out.print(this.collision_array[i][j]);
-        //     }
-        //     System.out.println();
-        // }
-        // System.out.println();
         StepResult result = new StepResult(
             collisionArrayToString(), 
             reward, 
@@ -168,10 +155,9 @@ public class SnakeGame {
     }
 
     public void drawGameState() {
-        GameState curGameState = this.getGameState();
-        int height = curGameState.field_grid.length;
-        int width = curGameState.field_grid[0].length;
-        int[][] collision_array = curGameState.field_grid;
+        int[][] collision_array = this.updateCollisionArray();
+        int height = collision_array.length;
+        int width = collision_array[0].length;
 
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -200,17 +186,10 @@ public class SnakeGame {
         for (int i = 0; i < this.collision_array.length; i++) {
             collision_array_coppy[i] = Arrays.copyOf(this.collision_array[i], this.collision_array[i].length);
         }
-        collision_array_coppy[this.head.x][this.head.y] = 2;
-        collision_array_coppy[this.food.x][this.food.y] = 3;
+        collision_array_coppy[this.head.y][this.head.x] = 2;
+        collision_array_coppy[this.food.y][this.food.x] = 3;
         
         return collision_array_coppy;
-    }
-
-    public GameState getGameState() {
-        int[][] collision_array_coppy = updateCollisionArray();
-        return new GameState(
-            collision_array_coppy
-        );
     }
 
     public String collisionArrayToString() {
@@ -277,11 +256,4 @@ public class SnakeGame {
         }
     }
 
-    public class GameState {
-        private int[][] field_grid;
-
-        public GameState(int[][] field_grid) {
-            this.field_grid = field_grid;
-        } 
-    }
 }
