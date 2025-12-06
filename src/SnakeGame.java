@@ -8,11 +8,11 @@ public class SnakeGame {
     public Deque<Position> snake_order = new ArrayDeque<>();
     private Position food;
     private Position head;
-    private Direction direction = Direction.DOWN;
+    private Direction direction = Direction.START; //Direction.DOWN;
     // private boolean gameOver = false;
     // private int score = 0;
     private boolean ateFoodLastRound = false;
-    private volatile Direction nextDirection = Direction.DOWN;
+    private volatile Direction nextDirection = Direction.START; //Direction.DOWN;
 
     private float reward = 0;
 
@@ -38,6 +38,9 @@ public class SnakeGame {
         this.snake_order.add(start_position);
         this.collision_array[startX][startY] = 1;
 
+        this.direction = Direction.START;
+        this.nextDirection = Direction.START;
+
         this.getNewFood();
     }
 
@@ -51,26 +54,8 @@ public class SnakeGame {
         int newX = -1;
         int newY = -1;
         // get the new Head position of the snake after the update
-        switch (this.direction) {
-            case RIGHT:
-                newX = oldHeadPosition.x + 1;
-                newY = oldHeadPosition.y;
-                break;
-            case DOWN:
-                newX = oldHeadPosition.x;
-                newY = oldHeadPosition.y + 1;
-                break;
-            case LEFT:
-                newX = oldHeadPosition.x - 1;
-                newY = oldHeadPosition.y;
-                break;
-            case UP:
-                newX = oldHeadPosition.x;
-                newY = oldHeadPosition.y - 1;
-                break;
-            default:
-                break;
-        }
+        newX = oldHeadPosition.x + this.direction.dx;
+        newY = oldHeadPosition.y + this.direction.dy;
         if (isCollision(newX, newY)) {
             // this.gameOver = true;
             this.reward = -1;
@@ -164,13 +149,13 @@ public class SnakeGame {
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (collision_array[j][i] == 3) {
+                if (collision_array[i][j] == 3) {
                     System.out.print("x");
                 }
-                else if (collision_array[j][i] == 2) {
+                else if (collision_array[i][j] == 2) {
                     System.out.print("O");
                 }
-                else if (collision_array[j][i] == 1) {
+                else if (collision_array[i][j] == 1) {
                     System.out.print("o");
                 }
                 else {
@@ -227,10 +212,11 @@ public class SnakeGame {
     }
 
     public enum Direction {
-        UP(0, 1),
+        UP(0, -1),
         RIGHT(1, 0),
-        DOWN(0, -1),
-        LEFT(-1, 0);
+        DOWN(0, 1),
+        LEFT(-1, 0),
+        START(0,0);
 
         private final int dx;
         private final int dy;

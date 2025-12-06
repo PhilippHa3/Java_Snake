@@ -2,8 +2,9 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         boolean play = false;
+        int board_size = 5;
         if (play) {
-            SnakeGame game = new SnakeGame(9,9);
+            SnakeGame game = new SnakeGame(board_size,board_size);
             Thread inputThread = new Thread(new InputHandler(game));
             GameEngine gameEngine = new GameEngine(game);
             gameEngine.start();
@@ -11,7 +12,7 @@ public class App {
             inputThread.start();
         }
         else {
-            SnakeGame game = new SnakeGame(9,9);
+            SnakeGame game = new SnakeGame(board_size,board_size);
             GameEnvironment env = new GameEnvironment(game);
     
             try {
