@@ -55,28 +55,6 @@ class JavaSnakeEnv(gym.Env):
     def close(self):
         self.sock.close()
 
-    def drawImage(self, obs):
-        for i in range(len(obs)):
-            for j in range(len(obs[0])):
-                if obs[i][j] == 1:
-                    print('o', end='', flush=True)
-                elif obs[i][j] == 2:
-                    print('O', end='', flush=True)
-                elif obs[i][j] == 3:
-                    print('x', end='', flush=True)
-                else:
-                    print('-', end='', flush=True)
-            print()
-
-    def actionToNumber(self, act_int):
-        if act_int == 0:
-            return 'UP'
-        elif act_int == 1:
-            return 'RIGHT'
-        elif act_int == 2:
-            return "DOWN"
-        elif act_int == 3:
-            return "LEFT"
 
 if __name__ == '__main__':
     env = JavaSnakeEnv(board_size=7)
