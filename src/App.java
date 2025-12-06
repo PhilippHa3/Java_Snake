@@ -1,5 +1,5 @@
 public class App {
-
+    // TODO: implement Curriculum Learning -> increase board size over time during training
     public static void main(String[] args) throws Exception {
         boolean play = false;
         int board_size = 5;

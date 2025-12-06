@@ -8,12 +8,10 @@ public class SnakeGame {
     public Deque<Position> snake_order = new ArrayDeque<>();
     private Position food;
     private Position head;
-    private Direction direction = Direction.START; //Direction.DOWN;
-    // private boolean gameOver = false;
+    private Direction direction = Direction.START;
     // private int score = 0;
     private boolean ateFoodLastRound = false;
-    private volatile Direction nextDirection = Direction.START; //Direction.DOWN;
-
+    private volatile Direction nextDirection = Direction.START;
     private float reward = 0;
 
     public SnakeGame(int field_width, int field_height) {
@@ -36,7 +34,8 @@ public class SnakeGame {
         Position start_position = new Position(startX, startY);
         this.head = start_position;
         this.snake_order.add(start_position);
-        this.collision_array[startX][startY] = 1;
+        this.collision_array[startY][startX] = 1;
+        this.ateFoodLastRound = false;
 
         this.direction = Direction.START;
         this.nextDirection = Direction.START;
