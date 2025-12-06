@@ -2,6 +2,8 @@ import gymnasium as gym
 from gymnasium import spaces
 import socket, time
 import numpy as np
+import sys
+
 
 class JavaSnakeEnv(gym.Env):
     
@@ -34,6 +36,10 @@ class JavaSnakeEnv(gym.Env):
         self.sock.sendall(f"{action}\n".encode('utf-8'))
         data = self.sock.recv(4096).decode('utf-8')
         obs, reward, done, info = self._parseInput(data)
+        # print(self.actionToNumber(action), reward)
+        # self.drawImage(obs)
+        # time.sleep(2)
+        # print()
         return obs, reward, False, done, info
 
     def reset(self, seed=None, options=None):
@@ -41,11 +47,36 @@ class JavaSnakeEnv(gym.Env):
         data = self.sock.recv(4096).decode('utf-8')
 
         obs, _, _, info = self._parseInput(data)
+        # print('RESET')
+        # self.drawImage(obs)
+        # print()
         return obs, info
     
     def close(self):
         self.sock.close()
 
+    def drawImage(self, obs):
+        for i in range(len(obs)):
+            for j in range(len(obs[0])):
+                if obs[i][j] == 1:
+                    print('o', end='', flush=True)
+                elif obs[i][j] == 2:
+                    print('O', end='', flush=True)
+                elif obs[i][j] == 3:
+                    print('x', end='', flush=True)
+                else:
+                    print('-', end='', flush=True)
+            print()
+
+    def actionToNumber(self, act_int):
+        if act_int == 0:
+            return 'UP'
+        elif act_int == 1:
+            return 'RIGHT'
+        elif act_int == 2:
+            return "DOWN"
+        elif act_int == 3:
+            return "LEFT"
 
 if __name__ == '__main__':
     env = JavaSnakeEnv(board_size=7)
