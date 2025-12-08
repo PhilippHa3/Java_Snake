@@ -8,7 +8,7 @@ This project implements the classic Snake Game in Java and uses a network connec
 <!-- ????????????????? -->
 The implementation offers two different use cases:  
 - Playing the game: The game is visualized in the Command Line.
-- Training RL agent: The game state is sent to the python application and then a PPO agent is trained.
+- Training RL agent: The game state is sent to the python application and then a RL agent is trained.
 
 ## Components:
 The application is split into two main components that communicate over a network socket:  

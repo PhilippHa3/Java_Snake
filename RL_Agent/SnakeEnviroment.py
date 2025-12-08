@@ -13,9 +13,10 @@ class JavaSnakeEnv(gym.Env):
         self.action_space = spaces.Discrete(4)
 
         self.observation_space = spaces.Box(
-            low=0, high=3, shape=(board_size, board_size), dtype=np.int32
+            low=0, high=board_size, shape=(board_size * board_size * 2,), dtype=np.int32
         )
 
+        self.board_size = board_size
         self.host = host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,7 +26,16 @@ class JavaSnakeEnv(gym.Env):
         obs_str, reward_str, done_str = input_str.strip().split('|')
 
         obs_list = [[int(x) for x in row.split(',')] for row in obs_str.split(';')]
-        observation = np.array(obs_list, dtype=np.int32)
+        observation_board = np.array(obs_list, dtype=np.int32)
+        food_position = np.argwhere(observation_board == 3).ravel()
+        snake_head = np.argwhere(observation_board == 2).ravel()
+        snake_body = np.argwhere(observation_board == 1).ravel()
+
+        observation = np.zeros((self.board_size * self.board_size * 2))
+
+        observation[0:len(food_position)] = food_position
+        observation[2:2+len(snake_head)] = snake_head
+        observation[4:4+len(snake_body)] = snake_body
 
         reward = float(reward_str)
         done = done_str.lower() == 'true'
@@ -36,10 +46,6 @@ class JavaSnakeEnv(gym.Env):
         self.sock.sendall(f"{action}\n".encode('utf-8'))
         data = self.sock.recv(4096).decode('utf-8')
         obs, reward, done, info = self._parseInput(data)
-        # print(self.actionToNumber(action), reward)
-        # self.drawImage(obs)
-        # time.sleep(2)
-        # print()
         return obs, reward, False, done, info
 
     def reset(self, seed=None, options=None):
@@ -47,9 +53,6 @@ class JavaSnakeEnv(gym.Env):
         data = self.sock.recv(4096).decode('utf-8')
 
         obs, _, _, info = self._parseInput(data)
-        # print('RESET')
-        # self.drawImage(obs)
-        # print()
         return obs, info
     
     def close(self):

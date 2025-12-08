@@ -170,8 +170,8 @@ public class SnakeGame {
         for (int i = 0; i < this.collision_array.length; i++) {
             collision_array_coppy[i] = Arrays.copyOf(this.collision_array[i], this.collision_array[i].length);
         }
-        collision_array_coppy[this.head.y][this.head.x] = 2;
         collision_array_coppy[this.food.y][this.food.x] = 3;
+        collision_array_coppy[this.head.y][this.head.x] = 2;
         
         return collision_array_coppy;
     }
