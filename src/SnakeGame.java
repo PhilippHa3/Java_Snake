@@ -12,7 +12,7 @@ public class SnakeGame {
     // private int score = 0;
     private boolean ateFoodLastRound = false;
     private volatile Direction nextDirection = Direction.START;
-    private float reward = 0;
+    private double reward = 0.0;
 
     public SnakeGame(int field_width, int field_height) {
         this.random = new Random();
@@ -48,7 +48,7 @@ public class SnakeGame {
         if (this.nextDirection != null && !this.direction.isOpposite(this.nextDirection)) {
             this.direction = this.nextDirection;
         }
-        this.reward = 0;
+        this.reward = -0.01;
         Position oldHeadPosition = this.snake_order.getLast();
         int newX = -1;
         int newY = -1;
@@ -57,7 +57,7 @@ public class SnakeGame {
         newY = oldHeadPosition.y + this.direction.dy;
         if (isCollision(newX, newY)) {
             // this.gameOver = true;
-            this.reward = -1;
+            this.reward = -1.0;
             return false;
         }
         Position pos = new Position(newX, newY);
@@ -80,7 +80,7 @@ public class SnakeGame {
             }
             this.getNewFood();
             // this.score += 1;
-            this.reward = 1;
+            this.reward = 10;
         }
         
         return true;
@@ -130,7 +130,7 @@ public class SnakeGame {
             int x = random.nextInt(this.field_width);
             int y = random.nextInt(this.field_height);
             this.food = new Position(x, y);
-        } while (this.collision_array[this.food.x][this.food.y] != 0);
+        } while (this.collision_array[this.food.y][this.food.x] != 0);
     }
 
     private boolean gameFieldFull(){

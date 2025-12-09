@@ -2,7 +2,7 @@ public class App {
     // TODO: implement Curriculum Learning -> increase board size over time during training
     public static void main(String[] args) throws Exception {
         boolean play = false;
-        int board_size = 5;
+        int board_size = 36;
         if (play) {
             SnakeGame game = new SnakeGame(board_size,board_size);
             Thread inputThread = new Thread(new InputHandler(game));
