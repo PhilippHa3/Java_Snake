@@ -1,4 +1,4 @@
-# Java Snake Game with Python PPO agent
+# Java Snake Game with Python RL agent
 This project implements the classic Snake Game in Java and uses a network connection to stream the game state to an external Python service for Deep Reinforcement Learning (DRL). The goal was to build a functional, multi-language application to practice the fundamentals of Java, socket programming, and multi-language communication. 
 ### Core Objectives:
 - Mastering fundamental Java syntax and Object-Oriented Programming
@@ -29,7 +29,7 @@ The following shows a game of snake played by a human player:
 This gif shows the game played by a Trained PPO agent:  
 <!-- GIF -->
 
-The training process of the RL agent looks as follows:  
+The training process of the PPO agent looks as follows:  
 <!-- Picture of avg reward/episode length over training -->
 
 ## Key Takeaways:
