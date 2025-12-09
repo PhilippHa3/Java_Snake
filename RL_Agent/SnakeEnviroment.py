@@ -3,7 +3,7 @@ from gymnasium import spaces
 import socket, time
 import numpy as np
 import sys
-
+from stable_baselines3.common.env_checker import check_env
 
 class JavaSnakeEnv(gym.Env):
     
@@ -13,7 +13,7 @@ class JavaSnakeEnv(gym.Env):
         self.action_space = spaces.Discrete(4)
 
         self.observation_space = spaces.Box(
-            low=0, high=board_size, shape=(board_size * board_size * 2,), dtype=np.int32
+            low=0, high=3, shape=(3, board_size, board_size), dtype=np.uint8
         )
 
         self.board_size = board_size
@@ -26,16 +26,22 @@ class JavaSnakeEnv(gym.Env):
         obs_str, reward_str, done_str = input_str.strip().split('|')
 
         obs_list = [[int(x) for x in row.split(',')] for row in obs_str.split(';')]
-        observation_board = np.array(obs_list, dtype=np.int32)
-        food_position = np.argwhere(observation_board == 3).ravel()
-        snake_head = np.argwhere(observation_board == 2).ravel()
-        snake_body = np.argwhere(observation_board == 1).ravel()
+        observation_board = np.array(obs_list, dtype=np.float32)
+        # observation = observation_board
+        head_map = (observation_board == 2).astype(np.float32)
+        body_map = (observation_board == 1).astype(np.float32)
+        food_map = (observation_board == 3).astype(np.float32)
+        observation = np.stack([head_map, body_map, food_map], axis=0)
 
-        observation = np.zeros((self.board_size * self.board_size * 2))
+        # food_position = np.argwhere(observation_board == 3).ravel()
+        # snake_head = np.argwhere(observation_board == 2).ravel()
+        # snake_body = np.argwhere(observation_board == 1).ravel()
 
-        observation[0:len(food_position)] = food_position
-        observation[2:2+len(snake_head)] = snake_head
-        observation[4:4+len(snake_body)] = snake_body
+        # observation = np.zeros((self.board_size * self.board_size * 2))
+
+        # observation[0:len(food_position)] = food_position
+        # observation[2:2+len(snake_head)] = snake_head
+        # observation[4:4+len(snake_body)] = snake_body
 
         reward = float(reward_str)
         done = done_str.lower() == 'true'
@@ -60,13 +66,14 @@ class JavaSnakeEnv(gym.Env):
 
 
 if __name__ == '__main__':
-    env = JavaSnakeEnv(board_size=7)
-    running = True
-    obs, _ = env.reset()
-    i = 0
-    while running:
-        # print((i%5) - 1)
-        obs, rew, _, done, _ = env.step((i%5)-1)
-        print(obs, '\n', rew, '\n', done)
-        time.sleep(1)
-        i += 1
+    env = JavaSnakeEnv(board_size=15)
+    check_env(env)
+    # running = True
+    # obs, _ = env.reset()
+    # i = 0
+    # while running:
+    #     # print((i%5) - 1)
+    #     obs, rew, _, done, _ = env.step((i%5)-1)
+    #     print(obs, '\n', rew, '\n', done)
+    #     time.sleep(1)
+    #     i += 1
