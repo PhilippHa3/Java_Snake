@@ -4,6 +4,7 @@ import java.util.TimerTask;
 public class GameEngine {
     private SnakeGame game;
     private Timer timer;
+    // updates game board every second
     private final int DELAY = 1;
     private final int INTERVAL = 1000;
 

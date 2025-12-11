@@ -9,9 +9,9 @@ public class SnakeGame {
     private Position food;
     private Position head;
     private Direction direction = Direction.START;
-    // private int score = 0;
     private boolean ateFoodLastRound = false;
     private volatile Direction nextDirection = Direction.START;
+    // for the RL agents training
     private double reward = 0.0;
 
     public SnakeGame(int field_width, int field_height) {
@@ -19,10 +19,6 @@ public class SnakeGame {
         this.field_width = field_width;
         this.field_height = field_height;
         resetGame(field_width, field_height);
-    }
-    
-    public void setNextDirection(Direction newDir) {
-        this.nextDirection = newDir;
     }
 
     private void resetGame(int field_width, int field_height) {
@@ -43,6 +39,14 @@ public class SnakeGame {
         this.getNewFood();
     }
 
+    public void setNextDirection(Direction newDir) {
+        this.nextDirection = newDir;
+    }
+
+    /*
+        This functions updates the gamestate of the snake game for one step.
+        @returns boolean: if the game after the step is still active or if it is finished.
+    */
     public boolean update() {
         // returns if the game is still going
         if (this.nextDirection != null && !this.direction.isOpposite(this.nextDirection)) {
@@ -50,21 +54,20 @@ public class SnakeGame {
         }
         this.reward = -0.01;
         Position oldHeadPosition = this.snake_order.getLast();
-        int newX = -1;
-        int newY = -1;
         // get the new Head position of the snake after the update
-        newX = oldHeadPosition.x + this.direction.dx;
-        newY = oldHeadPosition.y + this.direction.dy;
+        int newX = oldHeadPosition.x + this.direction.dx;
+        int newY = oldHeadPosition.y + this.direction.dy;
         if (isCollision(newX, newY)) {
             // this.gameOver = true;
             this.reward = -1.0;
             return false;
         }
         Position pos = new Position(newX, newY);
+        // update the parameters of the game
         this.head = pos;
         this.collision_array[pos.y][pos.x] = 1;       
         this.snake_order.add(pos);
-        // snake ate the food
+        // snake ate the food (last round)
         if (this.ateFoodLastRound) {
             this.ateFoodLastRound = false;
         } else {
@@ -75,17 +78,21 @@ public class SnakeGame {
         if (this.food.compare(pos)) {
             this.ateFoodLastRound = true;
             if (this.gameFieldFull()) { 
-                // this.gameOver = true;
                 return false; 
             }
             this.getNewFood();
-            // this.score += 1;
             this.reward = 10;
         }
-        
         return true;
     }
 
+    /*
+        Function for the RL agent training, which takes a input direction as an int
+        and updates the gamestate of the Snake Game (inspired by Gym RL enviroments)
+        @param int: a int value that maps to a direction (up, right, down, left)
+        @return StepResult: returns the observation, reward and if the game is still running
+        for the training of the RL agent
+    */
     public StepResult step(int newDirectionInt) {
         Direction newDirection = null;
         switch (newDirectionInt) {
@@ -114,17 +121,29 @@ public class SnakeGame {
         return result;
     }
 
+    /*
+        Resets the game state to  new game.
+        @return String: returns the game board as a string.
+    */
     public String reset() {
         resetGame(field_width, field_height);
         return collisionArrayToString();
     }
 
+    /* 
+        funtion to test if the next position of the snake results in a collision
+        @param ints: x/y position of the new position of the snake
+        @return boolean: returns if it is a collition or not
+    */
     private boolean isCollision(int x, int y) {
         return x < 0 || x >= this.field_width ||
             y < 0 || y >= this.field_height ||
             this.collision_array[x][y] > 0;
     }
 
+    /*
+        Spawns a new food item somewhere on the game field
+    */
     private void getNewFood(){
         do {
             int x = random.nextInt(this.field_width);
@@ -138,6 +157,9 @@ public class SnakeGame {
         return (snakeLength == this.field_width * this.field_height);
     }
 
+    /*
+        visualization of the game state.
+    */
     public void drawGameState() {
         int[][] collision_array = this.updateCollisionArray();
         int height = collision_array.length;
@@ -165,6 +187,11 @@ public class SnakeGame {
         }
     }
 
+    /*
+        updates the collision array to include the position of the food item
+        as well as the position of the head of the snake.
+        @return int[][]: a 2d matrix with ints that give the food/head/body position of the snake
+    */
     private int[][] updateCollisionArray() {
         int[][] collision_array_coppy = new int[this.collision_array.length][];
         for (int i = 0; i < this.collision_array.length; i++) {
@@ -176,6 +203,11 @@ public class SnakeGame {
         return collision_array_coppy;
     }
 
+    /*
+        Function to transform the collision array to a string in a reversable way.
+        Is used to send information through the socket to the python implementation.
+        @return String: the collision array as a string, split by ',' and ';'
+    */
     public String collisionArrayToString() {
         int[][] collision_array_coppy = updateCollisionArray();
         StringBuilder sb = new StringBuilder();
@@ -193,6 +225,9 @@ public class SnakeGame {
         return sb.toString();
     }
 
+    /*
+        A basic class that saves the position of the different parts on the game field.
+    */
     public class Position {
         public int x, y;
     
@@ -210,6 +245,9 @@ public class SnakeGame {
         }
     }
 
+    /*
+        Enum that defines the possible directions of the snake.
+    */
     public enum Direction {
         UP(0, -1),
         RIGHT(1, 0),
