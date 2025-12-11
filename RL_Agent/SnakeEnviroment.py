@@ -10,17 +10,21 @@ class JavaSnakeEnv(gym.Env):
     def __init__(self, host='localhost', port=9000, board_size=12):
         super(JavaSnakeEnv, self).__init__()
 
-        self.action_space = spaces.Discrete(4)
-
-        self.observation_space = spaces.Box(
-            low=0, high=3, shape=(3, board_size, board_size), dtype=np.uint8
-        )
 
         self.board_size = board_size
         self.host = host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.host, self.port))
+
+        # self.observation_space = spaces.Box(
+        #     low=0, high=3, shape=(3, board_size, board_size), dtype=np.uint8
+        # )
+        self.observation_space = spaces.Box(
+            low=0, high=board_size, shape=((self.board_size * self.board_size * 2)+ 2, ), dtype=np.uint8
+        )
+        self.action_space = spaces.Discrete(4)
+
 
     def _parseInput(self, input_str:str):
         obs_str, reward_str, done_str = input_str.strip().split('|')
@@ -33,15 +37,15 @@ class JavaSnakeEnv(gym.Env):
         food_map = (observation_board == 3).astype(np.float32)
         observation = np.stack([head_map, body_map, food_map], axis=0)
 
-        # food_position = np.argwhere(observation_board == 3).ravel()
-        # snake_head = np.argwhere(observation_board == 2).ravel()
-        # snake_body = np.argwhere(observation_board == 1).ravel()
+        food_position = np.argwhere(observation_board == 3).ravel()
+        snake_head = np.argwhere(observation_board == 2).ravel()
+        snake_body = np.argwhere(observation_board == 1).ravel()
 
-        # observation = np.zeros((self.board_size * self.board_size * 2))
+        observation = np.zeros(((self.board_size * self.board_size * 2)+2))
 
-        # observation[0:len(food_position)] = food_position
-        # observation[2:2+len(snake_head)] = snake_head
-        # observation[4:4+len(snake_body)] = snake_body
+        observation[0:len(food_position)] = food_position
+        observation[2:2+len(snake_head)] = snake_head
+        observation[4:4+len(snake_body)] = snake_body
 
         reward = float(reward_str)
         done = done_str.lower() == 'true'
