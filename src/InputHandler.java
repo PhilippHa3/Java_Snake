@@ -1,11 +1,14 @@
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 public class InputHandler implements Runnable {
     private SnakeGame game;
+    private CountDownLatch startLatch;
     private volatile boolean running = true;
 
-    public InputHandler(SnakeGame game) {
+    public InputHandler(SnakeGame game, CountDownLatch startLatch) {
         this.game = game;
+        this.startLatch = startLatch;
     }
 
     @Override
@@ -17,6 +20,7 @@ public class InputHandler implements Runnable {
                 SnakeGame.Direction newDir = mapInputToDirection(input);
                 if (newDir != null) {
                     game.setNextDirection(newDir);
+                    this.startLatch.countDown();
                 }
             }
         }
