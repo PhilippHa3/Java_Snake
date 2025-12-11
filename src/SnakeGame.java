@@ -22,7 +22,7 @@ public class SnakeGame {
     }
 
     private void resetGame(int field_width, int field_height) {
-        this.collision_array = new int[field_width][field_height];
+        this.collision_array = new int[field_height][field_width];
         this.snake_order = new ArrayDeque<>();
 
         int startX = field_width/2;
@@ -41,6 +41,10 @@ public class SnakeGame {
 
     public void setNextDirection(Direction newDir) {
         this.nextDirection = newDir;
+    }
+
+    public Direction getDirection(){
+        return this.direction;
     }
 
     /*
@@ -138,7 +142,7 @@ public class SnakeGame {
     private boolean isCollision(int x, int y) {
         return x < 0 || x >= this.field_width ||
             y < 0 || y >= this.field_height ||
-            this.collision_array[x][y] > 0;
+            this.collision_array[y][x] > 0;
     }
 
     /*
