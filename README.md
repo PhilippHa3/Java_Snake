@@ -25,7 +25,7 @@ The application is split into two main components that communicate over a networ
 
 ## Demo:
 The following shows a game of snake played by a human player:  
-![A snake game played by a Human](./images/SnakeGame_HumanPlayer.gif)
+<img src="./images/SnakeGame_HumanPlayer.gif" alt="A snake game played by a Human" width="600"/>
 
 <!-- This gif shows the game played by a Trained PPO agent:  
 <!-- GIF -->
