@@ -24,13 +24,13 @@ The application is split into two main components that communicate over a networ
 
 ## Demo:
 The following shows a game of snake played by a human player:  
+![A snake game played by a Human](./images/SnakeGame_HumanPlayer.gif)
+
+<!-- This gif shows the game played by a Trained PPO agent:  
 <!-- GIF -->
 
-This gif shows the game played by a Trained PPO agent:  
-<!-- GIF -->
-
-The training process of the PPO agent looks as follows:  
-<!-- Picture of avg reward/episode length over training -->
+<!-- The training process of the PPO agent looks as follows:  
+Picture of avg reward/episode length over training -->
 
 ## Key Takeaways:
 The project serves as successful exercise in:
