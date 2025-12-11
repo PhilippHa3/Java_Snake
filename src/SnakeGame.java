@@ -82,6 +82,7 @@ public class SnakeGame {
         if (this.food.compare(pos)) {
             this.ateFoodLastRound = true;
             if (this.gameFieldFull()) { 
+                this.reward = 100;
                 return false; 
             }
             this.getNewFood();

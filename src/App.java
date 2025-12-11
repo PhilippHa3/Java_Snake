@@ -3,8 +3,8 @@ import java.util.concurrent.CountDownLatch;
 public class App {
     // TODO: implement Curriculum Learning -> increase board size over time during training
     public static void main(String[] args) throws Exception {
-        boolean play = true;
-        int board_size = 9;
+        boolean play = false;
+        int board_size = 3;
         if (play) {
             CountDownLatch startLatch = new CountDownLatch(1);
             SnakeGame game = new SnakeGame(36,9);
