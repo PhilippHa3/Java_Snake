@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.*;
 
 public class SnakeGame {
@@ -11,14 +14,19 @@ public class SnakeGame {
     private Direction direction = Direction.START;
     private boolean ateFoodLastRound = false;
     private volatile Direction nextDirection = Direction.START;
+    // for visualization
+    private final BufferedWriter writer;
+    private final StringBuilder frameBuffer = new StringBuilder();
     // for the RL agents training
     private double reward = 0.0;
+
 
     public SnakeGame(int field_width, int field_height) {
         this.random = new Random();
         this.field_width = field_width;
         this.field_height = field_height;
         resetGame(field_width, field_height);
+        this.writer = new BufferedWriter(new OutputStreamWriter(System.out));
     }
 
     private void resetGame(int field_width, int field_height) {
@@ -170,25 +178,32 @@ public class SnakeGame {
         int height = collision_array.length;
         int width = collision_array[0].length;
 
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 if (collision_array[i][j] == 3) {
-                    System.out.print("x");
+                    this.frameBuffer.append("x");
                 }
                 else if (collision_array[i][j] == 2) {
-                    System.out.print("O");
+                    this.frameBuffer.append("O");
                 }
                 else if (collision_array[i][j] == 1) {
-                    System.out.print("o");
+                    this.frameBuffer.append("o");
                 }
                 else {
-                    System.out.print("-");
+                    this.frameBuffer.append("-");
                 }
             }
-            System.out.println();
+            this.frameBuffer.append("\r\n");
+        }
+        String frameString = this.frameBuffer.toString();
+        try {
+            this.writer.write("\033[2J\033[H");
+            this.writer.flush();
+            this.writer.write(frameString);
+            this.writer.flush();
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
         }
     }
 
